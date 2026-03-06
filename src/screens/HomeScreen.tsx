@@ -1,11 +1,13 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { connectWallet } from "../wallet/connectWallet";
 
 export default function HomeScreen() {
 
-  const connectWallet = () => {
-    console.log("Connect wallet clicked");
-  };
+  const connectWalletHandler = async () => {
+  const address = await connectWallet();
+  console.log(address);
+};
 
   return (
     <View style={styles.container}>
@@ -21,7 +23,7 @@ export default function HomeScreen() {
         The side with the biggest pool wins the competition.
       </Text>
 
-      <TouchableOpacity style={styles.button} onPress={connectWallet}>
+      <TouchableOpacity style={styles.button} onPress={connectWalletHandler}>
         <Text style={styles.buttonText}>Connect Wallet</Text>
       </TouchableOpacity>
 
