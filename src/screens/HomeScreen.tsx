@@ -3,10 +3,21 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { connectWallet } from "../wallet/connectWallet";
 import { useWallet } from "../context/WalletContext";
 import CompetitionFeed from "./CompetitionFeed";
+import { useEffect, useState } from "react";
+import { getSkrBalance } from "../solana/getSkrBalance";
 
 export default function HomeScreen() {
 
   const { walletAddress, setWalletAddress } = useWallet();
+  const [skrBalance, setSkrBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+  if (walletAddress) {
+    getSkrBalance(walletAddress).then((balance) => {
+      setSkrBalance(balance);
+    });
+  }
+}, [walletAddress]);
 
   const connectWalletHandler = async () => {
     const address = await connectWallet();
@@ -19,6 +30,11 @@ export default function HomeScreen() {
   if (walletAddress) {
   return <CompetitionFeed />;
 }
+{skrBalance !== null && (
+  <Text style={{ color: "#39FF14", marginTop: 10 }}>
+    SKR Balance: {skrBalance}
+  </Text>
+)}
 
   return (
     <View style={styles.container}>
