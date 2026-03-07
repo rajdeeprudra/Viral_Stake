@@ -1,13 +1,19 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { connectWallet } from "../wallet/connectWallet";
+import { useWallet } from "../context/WalletContext";
 
 export default function HomeScreen() {
 
+  const { walletAddress, setWalletAddress } = useWallet();
+
   const connectWalletHandler = async () => {
-  const address = await connectWallet();
-  console.log(address);
-};
+    const address = await connectWallet();
+
+    if (address) {
+      setWalletAddress(address);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -24,8 +30,16 @@ export default function HomeScreen() {
       </Text>
 
       <TouchableOpacity style={styles.button} onPress={connectWalletHandler}>
-        <Text style={styles.buttonText}>Connect Wallet</Text>
+        <Text style={styles.buttonText}>
+          {walletAddress ? "Wallet Connected" : "Connect Wallet"}
+        </Text>
       </TouchableOpacity>
+
+      {walletAddress && (
+        <Text style={styles.walletText}> 
+          {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+        </Text>
+      )}
 
     </View>
   );
@@ -73,6 +87,12 @@ const styles = StyleSheet.create({
     color: "#000",
     fontWeight: "bold",
     fontSize: 18
+  },
+
+  walletText: {
+    color: "#39FF14",
+    marginTop: 20,
+    fontSize: 16
   }
 
 });
