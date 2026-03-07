@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Video, ResizeMode } from "expo-av";
+import StakeModal from "../components/StakeModal";
 
 export default function CompetitionFeed() {
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedSide, setSelectedSide] = useState<"A" | "B">("A");
+
   return (
     <View style={styles.container}>
 
       <Text style={styles.title}>Live Competition</Text>
 
       <View style={styles.videoContainer}>
+
+        {/* VIDEO A */}
 
         <View style={styles.videoBox}>
           <Video
@@ -17,14 +24,24 @@ export default function CompetitionFeed() {
             resizeMode={ResizeMode.COVER}
             shouldPlay
             isLooping
+            isMuted
           />
 
           <Text style={styles.pool}>Pool A: 120 SKR</Text>
 
-          <TouchableOpacity style={styles.stakeButton}>
+          <TouchableOpacity
+            style={styles.stakeButton}
+            onPress={() => {
+              setSelectedSide("A");
+              setModalVisible(true);
+            }}
+          >
             <Text style={styles.stakeText}>Stake A</Text>
           </TouchableOpacity>
+
         </View>
+
+        {/* VIDEO B */}
 
         <View style={styles.videoBox}>
           <Video
@@ -38,12 +55,27 @@ export default function CompetitionFeed() {
 
           <Text style={styles.pool}>Pool B: 80 SKR</Text>
 
-          <TouchableOpacity style={styles.stakeButton}>
+          <TouchableOpacity
+            style={styles.stakeButton}
+            onPress={() => {
+              setSelectedSide("B");
+              setModalVisible(true);
+            }}
+          >
             <Text style={styles.stakeText}>Stake B</Text>
           </TouchableOpacity>
+
         </View>
 
       </View>
+
+      {/* STAKE MODAL */}
+
+      <StakeModal
+        visible={modalVisible}
+        side={selectedSide}
+        onClose={() => setModalVisible(false)}
+      />
 
     </View>
   );
@@ -83,7 +115,8 @@ const styles = StyleSheet.create({
 
   pool: {
     color: "#39FF14",
-    marginTop: 10
+    marginTop: 10,
+    fontWeight: "bold"
   },
 
   stakeButton: {
