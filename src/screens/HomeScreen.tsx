@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { connectWallet } from "../wallet/connectWallet";
 import { useWallet } from "../context/WalletContext";
+import CompetitionFeed from "./CompetitionFeed";
 
 export default function HomeScreen() {
 
@@ -14,6 +15,10 @@ export default function HomeScreen() {
       setWalletAddress(address);
     }
   };
+
+  if (walletAddress) {
+  return <CompetitionFeed />;
+}
 
   return (
     <View style={styles.container}>
