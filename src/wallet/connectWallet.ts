@@ -1,25 +1,29 @@
-import { transact } from "@solana-mobile/mobile-wallet-adapter-protocol";
+import * as Linking from "expo-linking";
+import nacl from "tweetnacl";
+import bs58 from "bs58";
 
-export async function connectWallet() {
+export async function connectWallet(): Promise<string | null> {
   try {
 
-    const authorizationResult = await transact(async (wallet) => {
+    const dappKeyPair = nacl.box.keyPair();
 
-      const auth = await wallet.authorize({
-        cluster: "devnet",
-        identity: {
-          name: "ViralStake",
-        },
-      });
+    const redirectLink = Linking.createURL("onConnect");
 
-      return auth;
+    const params = new URLSearchParams({
+      dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
+      cluster: "devnet",
+      app_url: "https://viralstake.app",
+      redirect_link: redirectLink,
     });
 
-    console.log("Connected wallet:", authorizationResult.accounts[0].address);
+    const phantomUrl = `https://phantom.app/ul/v1/connect?${params.toString()}`;
 
-    return authorizationResult.accounts[0].address;
+    await Linking.openURL(phantomUrl);
+
+    return null; // until redirect handler returns wallet
 
   } catch (err) {
-    console.error("Wallet connection failed:", err);
+    console.log("Wallet connection error:", err);
+    return null;
   }
 }

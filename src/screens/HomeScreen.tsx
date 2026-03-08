@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import * as Linking from "expo-linking";
+
 import { connectWallet } from "../wallet/connectWallet";
 import { useWallet } from "../context/WalletContext";
 import CompetitionFeed from "./CompetitionFeed";
-import { useEffect, useState } from "react";
 import { getSkrBalance } from "../solana/getSkrBalance";
 
 export default function HomeScreen() {
@@ -11,34 +12,75 @@ export default function HomeScreen() {
   const { walletAddress, setWalletAddress } = useWallet();
   const [skrBalance, setSkrBalance] = useState<number | null>(null);
 
+  // Listen for Phantom redirect
   useEffect(() => {
-  if (walletAddress) {
-    getSkrBalance(walletAddress).then((balance) => {
-      setSkrBalance(balance);
-    });
-  }
-}, [walletAddress]);
+
+    const handleWalletRedirect = (event: { url: string }) => {
+
+      const { url } = event;
+
+      console.log("Redirect URL:", url);
+
+      const parsed = Linking.parse(url);
+
+      const walletKey =
+        parsed.queryParams?.phantom_encryption_public_key as string | undefined;
+
+      if (walletKey) {
+        setWalletAddress(walletKey);
+      }
+
+    };
+
+    const subscription = Linking.addEventListener("url", handleWalletRedirect);
+
+    return () => {
+      subscription.remove();
+    };
+
+  }, []);
+
+  // Fetch SKR balance
+  useEffect(() => {
+
+    if (walletAddress) {
+      getSkrBalance(walletAddress).then((balance) => {
+        setSkrBalance(balance);
+      });
+    }
+
+  }, [walletAddress]);
 
   const connectWalletHandler = async () => {
-    const address = await connectWallet();
-
-    if (address) {
-      setWalletAddress(address);
-    }
+    await connectWallet();
   };
 
+  // If wallet connected show competition feed
   if (walletAddress) {
-  return <CompetitionFeed />;
-}
-{skrBalance !== null && (
-  <Text style={{ color: "#39FF14", marginTop: 10 }}>
-    SKR Balance: {skrBalance}
-  </Text>
-)}
+    return (
+      <View style={{ flex: 1, backgroundColor: "#000" }}>
+        
+        <CompetitionFeed />
+
+        <View style={{ alignItems: "center", padding: 20 }}>
+          <Text style={styles.walletText}>
+            {walletAddress.slice(0,4)}...{walletAddress.slice(-4)}
+          </Text>
+
+          {skrBalance !== null && (
+            <Text style={{ color: "#39FF14", marginTop: 10 }}>
+              SKR Balance: {skrBalance}
+            </Text>
+          )}
+        </View>
+
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      
+
       <Text style={styles.title}>ViralStake</Text>
 
       <Text style={styles.subtitle}>
@@ -52,15 +94,9 @@ export default function HomeScreen() {
 
       <TouchableOpacity style={styles.button} onPress={connectWalletHandler}>
         <Text style={styles.buttonText}>
-          {walletAddress ? "Wallet Connected" : "Connect Wallet"}
+          Connect Wallet
         </Text>
       </TouchableOpacity>
-
-      {walletAddress && (
-        <Text style={styles.walletText}> 
-          {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
-        </Text>
-      )}
 
     </View>
   );
