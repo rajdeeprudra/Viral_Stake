@@ -42,7 +42,7 @@ export default function CompetitionFeed({ stakeSOL }: Props) {
 
           try {
 
-            const res = await fetch("http://192.168.31.70:3000/distribute", {
+            const res = await fetch("https://viral-stake.onrender.com/distribute", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json"

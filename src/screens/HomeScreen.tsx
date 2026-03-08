@@ -33,7 +33,7 @@ export default function HomeScreen() {
 
   try {
 
-    const res = await fetch("http://192.168.31.70:3000/stake", {
+    const res = await fetch("https://viral-stake.onrender.com/stake", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
