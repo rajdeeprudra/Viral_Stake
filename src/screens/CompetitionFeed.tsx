@@ -1,81 +1,158 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Video, ResizeMode } from "expo-av";
-import StakeModal from "../components/StakeModal";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 
-export default function CompetitionFeed() {
+interface Props {
+  stakeSOL: (side: string) => Promise<string | null>;
+}
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedSide, setSelectedSide] = useState<"A" | "B">("A");
+export default function CompetitionFeed({ stakeSOL }: Props) {
+
+  const [poolA, setPoolA] = useState(1.2);
+  const [poolB, setPoolB] = useState(0.8);
+
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [winner, setWinner] = useState<string | null>(null);
+  const [distributionDone, setDistributionDone] = useState(false);
+  const [rewardMessage, setRewardMessage] = useState("");
+
+  const stakeA = async () => {
+    const sig = await stakeSOL("A");
+    if (sig) setPoolA(prev => prev + 0.1);
+  };
+
+  const stakeB = async () => {
+    const sig = await stakeSOL("B");
+    if (sig) setPoolB(prev => prev + 0.1);
+  };
+
+  useEffect(() => {
+
+    if (timeLeft <= 0 && !distributionDone) {
+
+      const distribute = async () => {
+
+        let winSide = "Draw";
+
+        if (poolA > poolB) winSide = "A";
+        else if (poolB > poolA) winSide = "B";
+
+        setWinner(winSide);
+
+        if (winSide !== "Draw") {
+
+          try {
+
+            const res = await fetch("http://192.168.31.70:3000/distribute", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                winner: winSide
+              })
+            });
+
+            const data = await res.json();
+
+            console.log("Distribution result:", data);
+
+            setRewardMessage("Rewards distributed successfully!");
+
+          } catch (err) {
+
+            console.log("Distribution error:", err);
+            setRewardMessage("Reward distribution failed");
+
+          }
+
+        }
+
+        setDistributionDone(true);
+
+      };
+
+      distribute();
+
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+
+  }, [timeLeft, poolA, poolB, distributionDone]);
+
+  const total = poolA + poolB;
+  const percentA = ((poolA / total) * 100).toFixed(0);
 
   return (
     <View style={styles.container}>
 
       <Text style={styles.title}>Live Competition</Text>
 
-      <View style={styles.videoContainer}>
+      <Text style={styles.timer}>
+        Competition ends in: {timeLeft > 0 ? `${timeLeft}s` : "Finished"}
+      </Text>
 
-        {/* VIDEO A */}
+      <View style={styles.row}>
 
-        <View style={styles.videoBox}>
-          <Video
-            source={{ uri: "https://www.w3schools.com/html/mov_bbb.mp4" }}
-            style={styles.video}
-            resizeMode={ResizeMode.COVER}
-            shouldPlay
-            isLooping
-            isMuted
+        <View style={styles.card}>
+          <Image
+            source={{ uri: "https://i.imgur.com/8Km9tLL.png" }}
+            style={styles.image}
           />
 
-          <Text style={styles.pool}>Pool A: 120 SKR</Text>
+          <Text style={styles.pool}>
+            Pool A: {poolA.toFixed(2)} SOL
+          </Text>
 
           <TouchableOpacity
-            style={styles.stakeButton}
-            onPress={() => {
-              setSelectedSide("A");
-              setModalVisible(true);
-            }}
+            style={styles.button}
+            onPress={stakeA}
+            disabled={timeLeft <= 0}
           >
-            <Text style={styles.stakeText}>Stake A</Text>
+            <Text style={styles.buttonText}>Stake A</Text>
           </TouchableOpacity>
-
         </View>
 
-        {/* VIDEO B */}
-
-        <View style={styles.videoBox}>
-          <Video
-            source={{ uri: "https://www.w3schools.com/html/movie.mp4" }}
-            style={styles.video}
-            resizeMode={ResizeMode.COVER}
-            shouldPlay
-            isLooping
-            isMuted
+        <View style={styles.card}>
+          <Image
+            source={{ uri: "https://i.imgur.com/F28w3Ac.png" }}
+            style={styles.image}
           />
 
-          <Text style={styles.pool}>Pool B: 80 SKR</Text>
+          <Text style={styles.pool}>
+            Pool B: {poolB.toFixed(2)} SOL
+          </Text>
 
           <TouchableOpacity
-            style={styles.stakeButton}
-            onPress={() => {
-              setSelectedSide("B");
-              setModalVisible(true);
-            }}
+            style={styles.button}
+            onPress={stakeB}
+            disabled={timeLeft <= 0}
           >
-            <Text style={styles.stakeText}>Stake B</Text>
+            <Text style={styles.buttonText}>Stake B</Text>
           </TouchableOpacity>
-
         </View>
 
       </View>
 
-      {/* STAKE MODAL */}
+      <Text style={styles.dominance}>
+        Video A dominance: {percentA}%
+      </Text>
 
-      <StakeModal
-        visible={modalVisible}
-        side={selectedSide}
-        onClose={() => setModalVisible(false)}
-      />
+      {winner && (
+        <Text style={styles.winner}>
+          Winner: {winner}
+        </Text>
+      )}
+
+      {rewardMessage !== "" && (
+        <Text style={styles.reward}>
+          {rewardMessage}
+        </Text>
+      )}
 
     </View>
   );
@@ -83,55 +160,78 @@ export default function CompetitionFeed() {
 
 const styles = StyleSheet.create({
 
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-    paddingTop: 60,
-    alignItems: "center"
+  container:{
+    padding:20
   },
 
-  title: {
-    fontSize: 28,
-    color: "#39FF14",
-    fontWeight: "bold",
-    marginBottom: 20
+  title:{
+    fontSize:32,
+    fontWeight:"bold",
+    color:"#39FF14",
+    textAlign:"center",
+    marginBottom:10
   },
 
-  videoContainer: {
-    flexDirection: "row",
-    gap: 15
+  timer:{
+    color:"#fff",
+    textAlign:"center",
+    marginBottom:20
   },
 
-  videoBox: {
-    width: 160,
-    alignItems: "center"
+  row:{
+    flexDirection:"row",
+    justifyContent:"space-between"
   },
 
-  video: {
-    width: 160,
-    height: 250,
-    borderRadius: 10
+  card:{
+    width:"45%",
+    backgroundColor:"#111",
+    padding:10,
+    borderRadius:10
   },
 
-  pool: {
-    color: "#39FF14",
-    marginTop: 10,
-    fontWeight: "bold"
+  image:{
+    width:"100%",
+    height:150,
+    borderRadius:10
   },
 
-  stakeButton: {
-    backgroundColor: "#39FF14",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginTop: 10
+  pool:{
+    color:"#39FF14",
+    marginTop:10
   },
 
-  stakeText: {
-    color: "#000",
-    fontWeight: "bold"
+  button:{
+    backgroundColor:"#39FF14",
+    padding:10,
+    marginTop:10,
+    borderRadius:8
+  },
+
+  buttonText:{
+    color:"#000",
+    fontWeight:"bold",
+    textAlign:"center"
+  },
+
+  dominance:{
+    color:"#fff",
+    textAlign:"center",
+    marginTop:20
+  },
+
+  winner:{
+    marginTop:20,
+    textAlign:"center",
+    color:"#FFD700",
+    fontSize:22
+  },
+
+  reward:{
+    marginTop:10,
+    textAlign:"center",
+    color:"#00FFFF",
+    fontSize:16
   }
 
 });
-
-//65Cdg5UVsGadJBLnejR42hWmN6tDYeZLgSzm2h4j4bi6

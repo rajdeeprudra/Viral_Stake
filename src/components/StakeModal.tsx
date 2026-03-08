@@ -2,18 +2,24 @@ import React, { useState } from "react";
 import { View, Text, Modal, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 
 type Props = {
-  visible: boolean;
-  onClose: () => void;
-  side: "A" | "B";
-};
+  visible: boolean
+  side: "A" | "B"
+  onClose: () => void
+  onConfirm: (amount: string) => void
+}
 
-export default function StakeModal({ visible, onClose, side }: Props) {
+export default function StakeModal({ visible, onClose, onConfirm, side }: Props) {
 
   const [amount, setAmount] = useState("");
 
   const handleStake = () => {
-    console.log(`Stake ${amount} SKR on ${side}`);
-    onClose();
+
+    if (!amount) return;
+
+    onConfirm(amount);
+
+    setAmount("");
+
   };
 
   return (
@@ -26,14 +32,17 @@ export default function StakeModal({ visible, onClose, side }: Props) {
 
           <TextInput
             style={styles.input}
-            placeholder="Enter SKR amount"
+            placeholder="Enter SOL amount"
             placeholderTextColor="#888"
             keyboardType="numeric"
             value={amount}
             onChangeText={setAmount}
           />
 
-          <TouchableOpacity style={styles.confirmButton} onPress={handleStake}>
+          <TouchableOpacity
+            style={styles.confirmButton}
+            onPress={handleStake}
+          >
             <Text style={styles.confirmText}>Confirm Stake</Text>
           </TouchableOpacity>
 

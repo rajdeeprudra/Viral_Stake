@@ -1,6 +1,5 @@
-import 'react-native-get-random-values'
-import { Buffer } from 'buffer'
-import process from 'process'
+import { Buffer } from "buffer";
 
-global.Buffer = Buffer
-global.process = process
+if (!(global as any).Buffer) {
+  (global as any).Buffer = Buffer;
+}

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import * as Linking from "expo-linking";
 
 import { connectWallet } from "../wallet/connectWallet";
 import { useWallet } from "../context/WalletContext";
@@ -12,35 +11,6 @@ export default function HomeScreen() {
   const { walletAddress, setWalletAddress } = useWallet();
   const [skrBalance, setSkrBalance] = useState<number | null>(null);
 
-  // Listen for Phantom redirect
-  useEffect(() => {
-
-    const handleWalletRedirect = (event: { url: string }) => {
-
-      const { url } = event;
-
-      console.log("Redirect URL:", url);
-
-      const parsed = Linking.parse(url);
-
-      const walletKey =
-        parsed.queryParams?.phantom_encryption_public_key as string | undefined;
-
-      if (walletKey) {
-        setWalletAddress(walletKey);
-      }
-
-    };
-
-    const subscription = Linking.addEventListener("url", handleWalletRedirect);
-
-    return () => {
-      subscription.remove();
-    };
-
-  }, []);
-
-  // Fetch SKR balance
   useEffect(() => {
 
     if (walletAddress) {
@@ -52,33 +22,71 @@ export default function HomeScreen() {
   }, [walletAddress]);
 
   const connectWalletHandler = async () => {
+
     await connectWallet();
+
+    setWalletAddress("7LKVMGM2WmgYGH1qghkSDUUJQ2QsqxM3unZUJkqyiaYk");
+
   };
 
-  // If wallet connected show competition feed
+  const stakeSOL = async (side: string): Promise<string | null> => {
+
+  try {
+
+    const res = await fetch("http://192.168.31.70:3000/stake", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        wallet: walletAddress,
+        side: side
+      })
+    });
+
+    const data = await res.json();
+
+    return data.signature;
+
+  } catch (err) {
+
+    console.log(err);
+    return null;
+
+  }
+
+};
+
   if (walletAddress) {
+
     return (
+
       <View style={{ flex: 1, backgroundColor: "#000" }}>
-        
-        <CompetitionFeed />
+
+        <CompetitionFeed stakeSOL={stakeSOL} />
 
         <View style={{ alignItems: "center", padding: 20 }}>
+
           <Text style={styles.walletText}>
             {walletAddress.slice(0,4)}...{walletAddress.slice(-4)}
           </Text>
 
           {skrBalance !== null && (
             <Text style={{ color: "#39FF14", marginTop: 10 }}>
-              SKR Balance: {skrBalance}
+              Balance: {skrBalance} SOL
             </Text>
           )}
+
         </View>
 
       </View>
+
     );
+
   }
 
   return (
+
     <View style={styles.container}>
 
       <Text style={styles.title}>ViralStake</Text>
@@ -88,68 +96,69 @@ export default function HomeScreen() {
       </Text>
 
       <Text style={styles.description}>
-        Two videos compete. The community stakes on the one they believe will win.
-        The side with the biggest pool wins the competition.
+        Two videos compete. Stake on the one you believe will win.
       </Text>
 
       <TouchableOpacity style={styles.button} onPress={connectWalletHandler}>
         <Text style={styles.buttonText}>
-          Connect Wallet
+          Connect Phantom
         </Text>
       </TouchableOpacity>
 
     </View>
+
   );
+
 }
 
 const styles = StyleSheet.create({
 
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 30
+  container:{
+    flex:1,
+    backgroundColor:"#000",
+    justifyContent:"center",
+    alignItems:"center",
+    padding:30
   },
 
-  title: {
-    fontSize: 42,
-    fontWeight: "bold",
-    color: "#39FF14",
-    marginBottom: 20
+  title:{
+    fontSize:42,
+    fontWeight:"bold",
+    color:"#39FF14",
+    marginBottom:20
   },
 
-  subtitle: {
-    fontSize: 20,
-    color: "#fff",
-    marginBottom: 20,
-    textAlign: "center"
+  subtitle:{
+    fontSize:20,
+    color:"#fff",
+    marginBottom:20,
+    textAlign:"center"
   },
 
-  description: {
-    fontSize: 16,
-    color: "#aaa",
-    textAlign: "center",
-    marginBottom: 40
+  description:{
+    fontSize:16,
+    color:"#aaa",
+    textAlign:"center",
+    marginBottom:40
   },
 
-  button: {
-    backgroundColor: "#39FF14",
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 10
+  button:{
+    backgroundColor:"#39FF14",
+    paddingVertical:15,
+    paddingHorizontal:40,
+    borderRadius:10
   },
 
-  buttonText: {
-    color: "#000",
-    fontWeight: "bold",
-    fontSize: 18
+  buttonText:{
+    color:"#000",
+    fontWeight:"bold",
+    fontSize:18
   },
 
-  walletText: {
-    color: "#39FF14",
-    marginTop: 20,
-    fontSize: 16
+  walletText:{
+    color:"#39FF14",
+    marginTop:20,
+    fontSize:16
   }
 
 });

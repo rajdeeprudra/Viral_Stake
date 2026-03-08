@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 type WalletContextType = {
   walletAddress: string | null;
@@ -7,7 +7,8 @@ type WalletContextType = {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-export const WalletProvider = ({ children }: any) => {
+export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
+
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
   return (
@@ -18,9 +19,12 @@ export const WalletProvider = ({ children }: any) => {
 };
 
 export const useWallet = () => {
+
   const context = useContext(WalletContext);
+
   if (!context) {
     throw new Error("useWallet must be used inside WalletProvider");
   }
+
   return context;
 };
