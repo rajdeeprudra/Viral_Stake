@@ -3,7 +3,7 @@ import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.
 const stakeSOL = async () => {
   try {
 
-    const response = await fetch("http://192.168.31.70:3000/stake", {
+    const response = await fetch("https://viral-stake.onrender.com/stake", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
