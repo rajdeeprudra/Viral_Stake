@@ -82,9 +82,9 @@ Check out this Notion Doc for more: https://www.notion.so/ViralStake-Monolith-Ha
 ## Screenshots
 ![home page](screenshots/HOMESCREEN.jpeg)
 ![home page](screenshots/COMPETITIONFEED.jpeg)
-![home page](screenshots/STAKEMODAL.jpeg)
-![home page](screenshots/TRANSACTIONSTATUS.jpeg)
-![home page](screenshots/COMPETITIONRESult.jpeg)
+![home page](screenshots/STAKEMODAL.jpg)
+![home page](screenshots/TRANSACTIONSTATUS.jpg)
+![home page](screenshots/COMPETITIONRESult.jpg)
 
 
 ## Demo Video
