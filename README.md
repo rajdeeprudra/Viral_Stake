@@ -80,12 +80,17 @@ Check out this Notion Doc for more: https://www.notion.so/ViralStake-Monolith-Ha
 
 
 ## Screenshots
-![home page](screenshots/HOMESCREEN.jpeg)
-![home page](screenshots/COMPETITIONFEED.jpeg)
-![home page](screenshots/STAKEMODAL.jpg)
-![home page](screenshots/TRANSACTIONSTATUS.jpg)
-![home page](screenshots/COMPETITIONRESult.jpg)
 
+<p align="center">
+  <img src="screenshots/HOMESCREEN.jpeg" width="250"/>
+  <img src="screenshots/COMPETITIONFEED.jpeg" width="250"/>
+  <img src="screenshots/STAKEMODAL.jpg" width="250"/>
+</p>
+
+<p align="center">
+  <img src="screenshots/TRANSACTIONSTATUS.jpg" width="250"/>
+  <img src="screenshots/COMPETITIONRESult.jpg" width="250"/>
+</p>
 
 ## Demo Video
 
