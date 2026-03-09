@@ -34,9 +34,9 @@ Check out this Notion Doc for more: https://www.notion.so/ViralStake-Monolith-Ha
 
 ## IMPORTANT 
 
-### for this Hackthon purpose we only integrated staking SOL feature, but The real Intention is to make the users able to stake SKR Token! 
-## For Engagement Purpose we only calculated stakes = engagement later it can be upgraded to real time engagement tracking (Views, Likes, Comments, Shares) with anti bot Protection
-## for the demo we used 2 public videos/ images from the internet , Later version upgrades this to real time video  uploading (using s3 maybe)
+### For this Hackthon purpose we only integrated staking SOL feature, but The real Intention is to make the users able to stake SKR Token! 
+### For Engagement Purpose we only calculated stakes = engagement later it can be upgraded to real time engagement tracking (Views, Likes, Comments, Shares) with anti bot Protection
+### For the demo we used 2 public videos/ images from the internet , Later version upgrades this to real time video  uploading (using s3 maybe)
 
 
 ## How platform Works
